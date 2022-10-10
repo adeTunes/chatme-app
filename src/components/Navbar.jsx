@@ -1,28 +1,26 @@
 import React from "react";
-import SigIn from "./SigIn";
-import LogOut from "./LogOut";
+import { useContext } from "react";
+import { SetUserContext, UserContext } from "../App";
 
-const style = {
-    nav: `bg-gray-800 flex justify-between items-center p-4`,
-    heading: `text-white text-3xl`,
-};
+const Navbar = () => {
+    const setAuthUser = useContext(SetUserContext);
+    const authUser = useContext(UserContext);
 
-function Navbar({ user, loading }) {
-    console.log(user, loading);
     return (
-        <div className={style.nav}>
-            <h1 className={style.heading}>TuChat</h1>
-            {loading ? (
-                <>
-                    <p>
-                        <strong className="text-white">Authorizing...</strong>
-                    </p>
-                </>
-            ) : (
-                <>{user ? <LogOut /> : <SigIn />}</>
-            )}
+        <div className="navbar">
+            <span className="logo">ChatMe</span>
+            <div className="user">
+                <img src={authUser.profile_picture} alt="" />
+                <span>{authUser.username}</span>
+                <button
+                    onClick={() => {
+                        setAuthUser(null);
+                    }}>
+                    logout
+                </button>
+            </div>
         </div>
     );
-}
+};
 
 export default Navbar;

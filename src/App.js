@@ -1,27 +1,54 @@
-import React from "react";
-import Navbar from "./components/Navbar";
-import Chat from "./components/Chat";
+import Login from "./pages/Login ";
+import Register from "./pages/Register";
+import Home from "./pages/Home";
+import "./style.scss";
+import "./App.css";
+import React, { useState } from "react";
+import {
+    BrowserRouter as Router,
+    Routes,
+    Route,
+    Navigate,
+} from "react-router-dom";
 
-import { auth } from "./firebase";
-import { useAuthState } from "react-firebase-hooks/auth";
-
-const style = {
-    appContainer:
-        "max-w-[720px] w-[60%] mx-auto grid overflow-auto grid-rows-[1fr] text-center",
-    sectionContainer:
-        "bg-gray-100 rounded-[20px] shadow-xl border grid grid-rows-[auto_1fr_auto_auto] overflow-auto",
-};
+export const UserContext = React.createContext();
+export const SetUserContext = React.createContext();
 
 function App() {
-    const [user, loading] = useAuthState(auth);
+    const [authUser, setAuthUser] = useState(null);
+
+    const ProtectedRoute = ({ children }) => {
+        if (!authUser) {
+            return <Navigate to="/login" />;
+        }
+
+        return children;
+    };
 
     return (
-        <div className={style.appContainer}>
-            <section className={style.sectionContainer}>
-                <Navbar user={user} loading={loading} />
-                {user ? <Chat /> : null}
-            </section>
-        </div>
+        <Router>
+            <UserContext.Provider value={authUser}>
+                <SetUserContext.Provider value={setAuthUser}>
+                    <Routes>
+                        <Route path="/">
+                            <Route
+                                index
+                                element={
+                                    <ProtectedRoute>
+                                        <Home />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="login"
+                                element={<Login setAuthUser={setAuthUser} />}
+                            />
+                            <Route path="register" element={<Register />} />
+                        </Route>
+                    </Routes>
+                </SetUserContext.Provider>
+            </UserContext.Provider>
+        </Router>
     );
 }
 

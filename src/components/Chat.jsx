@@ -1,54 +1,40 @@
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
-import React, { useState, useEffect, useRef } from "react";
-import Message from "./Message";
-import { db } from "../firebase";
-import SendMessage from "./SendMessage";
+import React from "react";
+import Cam from "../images/cam.png";
+import Add from "../images/add.png";
+import More from "../images/more.png";
+import Messages from "./Messages";
+import Input from "./Input";
+import { UserContext } from "../App";
+import { useContext } from "react";
 
-const style = {
-    main: `flex flex-col p-[10px] overflow-auto`,
-};
-
-function Chat() {
-    const [messages, setMessages] = useState(null);
-    const scroll = useRef();
-
-    useEffect(() => {
-        const q = query(collection(db, "messages"), orderBy("timestamp"));
-        const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
-            let messages = [];
-            QuerySnapshot.forEach((doc) => {
-                messages.push({ ...doc.data(), id: doc.id });
-            });
-            setMessages(messages);
-        });
-        return () => unsubscribe();
-    }, []);
+const Chat = ({ setMessages, scroll, currentConversation, messages }) => {
+    const authUser = useContext(UserContext);
 
     return (
-        <>
-            <main className={style.main}>
-                {!messages ? (
-                    <strong>fetching messages...</strong>
-                ) : (
-                    messages.length === 0 && (
-                        <p className="flex flex-col gap-[30px]">
-                            <strong>No messages...</strong>
-                            <small>
-                                Be the first to send a message here...
-                            </small>
-                        </p>
-                    )
-                )}
-                {messages &&
-                    messages.map((message) => (
-                        <Message key={message.id} message={message} />
-                    ))}
-                <span ref={scroll}></span>
-            </main>
-            {/* Send Message Component */}
-            <SendMessage scroll={scroll} />
-        </>
+        <div className="chat">
+            <div className="chatInfo">
+                <span>
+                    {currentConversation
+                        ? currentConversation.starter === authUser.id
+                            ? currentConversation.second_party_username.toUpperCase()
+                            : currentConversation.starter_username.toUpperCase()
+                        : ""}
+                </span>
+                <div className="chatIcons">
+                    <img src={Cam} alt="" />
+                    <img src={Add} alt="" />
+                    <img src={More} alt="" />
+                </div>
+            </div>
+            <Messages scroll={scroll} messages={messages} />
+            <Input
+                scroll={scroll}
+                currentConversation={currentConversation}
+                setMessages={setMessages}
+                messages={messages}
+            />
+        </div>
     );
-}
+};
 
 export default Chat;

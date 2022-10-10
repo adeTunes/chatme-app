@@ -1,27 +1,43 @@
 import React from "react";
-import { auth } from "../firebase";
+import { useContext } from "react";
+import { useState } from "react";
+import { UserContext } from "../App";
 
-const style = {
-    message: `flex items-center shadow-xl m-4 py-2 px-3 rounded-tl-full rounded-tr-full`,
-    name: `absolute mt-[-4rem] text-gray-600 font-bold text-xs`,
-    sent: `bg-[#395dff] text-white flex-row-reverse text-end float-right rounded-bl-full`,
-    received: `bg-[#e5e5ea] text-black float-left rounded-br-full`,
-};
-
-function Message({ message }) {
-    const messageClass =
-        message.uid === auth.currentUser.uid
-            ? `${style.sent}`
-            : `${style.received}`;
+const Message = ({ msg, timeSent }) => {
+    const authUser = useContext(UserContext);
 
     return (
-        <div className="relative">
-            <div className={`${style.message} ${messageClass}`}>
-                <p className={style.name}>{message.name}</p>
-                <p>{message.text}</p>
+        <div
+            className={
+                authUser.id === msg.sender
+                    ? "message owner"
+                    : "message receiver"
+            }>
+            <div className="messageInfo">
+                <img
+                    src="https://images.pexels.com/photos/6389849/pexels-photo-6389849.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load"
+                    alt=""
+                />
+                <span style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
+                    {timeSent < 1
+                        ? "just now"
+                        : timeSent === 1
+                        ? `${timeSent} minute ago`
+                        : timeSent > 1 && timeSent < 59
+                        ? `${timeSent} minutes ago`
+                        : timeSent > 59 &&
+                          `${(timeSent / 60).toFixed()} hr ago`}
+                </span>
+            </div>
+            <div className="messageContent">
+                <p>{msg.text}</p>
+                {/* <img
+                    src="https://images.pexels.com/photos/6389849/pexels-photo-6389849.jpeg?auto=compress&cs=tinysrgb&w=600&lazy=load"
+                    alt=""
+                /> */}
             </div>
         </div>
     );
-}
+};
 
 export default Message;
